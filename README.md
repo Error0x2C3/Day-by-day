@@ -60,14 +60,11 @@ Each folder = **one day = one improvement**.
 
 You will see appear over the days:
 
-* Java
-* JavaFX
+* Java / JavaFX
 * C / Rust 🦀
 * Python
-* Lua
-* SQL
 * Linux / Arch scripts
-* Web: HTML, CSS, JS
+* Web: HTML, CSS, JS etc.
 * Configs for Neovim, Hyprland, etc.
 
 ---
