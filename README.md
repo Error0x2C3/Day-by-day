@@ -77,11 +77,3 @@ But you can open an issue to:
 * propose a challenge
 * give advice
 * suggest a feature
-
----
-
-# 📜 License
-
-MIT License.
-
----
