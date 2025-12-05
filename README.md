@@ -2,28 +2,90 @@
 
 ██████╗  █████╗ ██╗   ██╗    ██████╗ ██╗   ██╗    ██████╗  █████╗ ██╗   ██╗
 ██╔══██╗██╔══██╗╚██╗ ██╔╝    ██╔══██╗╚██╗ ██╔╝    ██╔══██╗██╔══██╗╚██╗ ██╔╝
-██║  ██║███████║ ╚████╔╝     ██████╔╝ ╚████╔╝     ██║  ██║███████║ ╚████╔╝ 
+██║  ██║███████║ ╚████╔╝     ██████╔╝ ╚████╔╝     ██║  ██║███████║ ╚████╔╝
 ██║  ██║██╔══██║  ╚██╔╝      ██╔══██╗  ╚██╔╝      ██║  ██║██╔══██║  ╚██╔╝  
 ██████╔╝██║  ██║   ██║       ██████╔╝   ██║       ██████╔╝██║  ██║   ██║   
 ╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═════╝    ╚═╝       ╚═════╝ ╚═╝  ╚═╝   ╚═╝  
-``` 
-                                                                           
+```
+
+<br>
+
+> **"Stronger Code !"**
+> — by [@luxluth](https://github.com/luxluth)
 
 ---
 
-## 🚀 À Propos du Projet
+# 📘 Day-by-day
 
-Ce dépôt est une initiative personnelle de codage quotidien. L'objectif principal est de **pratiquer, d'apprendre et de s'améliorer continuellement** dans divers langages et concepts de programmation.
+Every day, I write a piece of code.
+Not to be perfect.
+Not to impress.
+But to **improve myself, day after day**.
 
-Chaque dossier représente une journée ou un projet spécifique, marquant un pas de plus vers la maîtrise de nouvelles compétences.
+This repository contains:
 
-## 🎯 Objectifs
+* ✨ Mini‑projects
+* 🧪 Experiments
+* 📚 Daily learning
+* 💡 Ideas and tests
+* 🔧 Tools and scripts
 
-* **Amélioration Continue :** Se forcer à écrire du code *chaque jour* pour ancrer les habitudes de codage.
-* **Diversité des Langages :** Explorer et travailler avec différents langages de programmation (`Python`, `JavaScript`, `Rust`, etc.).
-* **Résolution de Problèmes :** Mettre en œuvre des algorithmes, des structures de données ou résoudre des défis de plateformes comme LeetCode ou Advent of Code.
-* **Documentation :** Apprendre à documenter correctement les petites applications et les fragments de code.
+---
 
-## 📁 Structure du Dépôt
+# 🚀 Goals
 
-La structure est simple et axée sur la date ou le sujet :
+* Build a **daily discipline**
+* Explore languages and technologies
+* Create a visible history of progression
+* Cultivate creativity through code
+
+---
+
+# 📂 Structure
+
+```txt
+day-001/
+  ├─ notes.md
+  ├─ code.*
+
+day-002/
+  ├─ notes.md
+  ├─ ...
+```
+
+Each folder = **one day = one improvement**.
+
+---
+
+# 🧰 Technologies Used
+
+You will see appear over the days:
+
+* Java
+* JavaFX
+* C / Rust 🦀
+* Python
+* Lua
+* SQL
+* Linux / Arch scripts
+* Web: HTML, CSS, JS
+* Configs for Neovim, Hyprland, etc.
+
+---
+
+# 💬 Contributing
+
+This project is personal.
+But you can open an issue to:
+
+* propose a challenge
+* give advice
+* suggest a feature
+
+---
+
+# 📜 License
+
+MIT License.
+
+---
