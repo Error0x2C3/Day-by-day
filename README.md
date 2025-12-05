@@ -1,33 +1,26 @@
-# 🌙 Day-by-day
-
-> *Code a little. Grow a l
-
-```
-# 📓 DAY-BY-DAY
-> This repository contains the code I will write every day, primarily to force myself to improve.
-
----
-
-## 📅 Journal du jour
-
-* **[2025-12-05]** : Implémentation du système de routing dans l'application Node.js.
-* **[2025-12-04]** : Révision des principes de programmation orientée objet (POO) en Python.
-* **[2025-12-03]** : Correction de bugs mineurs sur le projet 'Pomodoro Clock' en React.
+██████╗  █████╗ ██╗   ██╗    ██████╗ ██╗   ██╗    ██████╗  █████╗ ██╗   ██╗
+██╔══██╗██╔══██╗╚██╗ ██╔╝    ██╔══██╗╚██╗ ██╔╝    ██╔══██╗██╔══██╗╚██╗ ██╔╝
+██║  ██║███████║ ╚████╔╝     ██████╔╝ ╚████╔╝     ██║  ██║███████║ ╚████╔╝ 
+██║  ██║██╔══██║  ╚██╔╝      ██╔══██╗  ╚██╔╝      ██║  ██║██╔══██║  ╚██╔╝  
+██████╔╝██║  ██║   ██║       ██████╔╝   ██║       ██████╔╝██║  ██║   ██║   
+╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═════╝    ╚═╝       ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
+                                                                           
 
 ---
 
-## ✨ Objectifs à Long Terme
+## 🚀 À Propos du Projet
 
-* Maîtriser le **TypeScript** et ses avantages dans les grands projets.
-* Développer une expertise en **DevOps** (Docker, CI/CD).
-* Créer un projet full-stack complet (frontend + backend + base de données).
+Ce dépôt est une initiative personnelle de codage quotidien. L'objectif principal est de **pratiquer, d'apprendre et de s'améliorer continuellement** dans divers langages et concepts de programmation.
 
----
+Chaque dossier représente une journée ou un projet spécifique, marquant un pas de plus vers la maîtrise de nouvelles compétences.
 
-## 🛠️ Tech Stack
+## 🎯 Objectifs
 
-Les technologies que j'utilise et que j'apprends :
+* **Amélioration Continue :** Se forcer à écrire du code *chaque jour* pour ancrer les habitudes de codage.
+* **Diversité des Langages :** Explorer et travailler avec différents langages de programmation (`Python`, `JavaScript`, `Rust`, etc.).
+* **Résolution de Problèmes :** Mettre en œuvre des algorithmes, des structures de données ou résoudre des défis de plateformes comme LeetCode ou Advent of Code.
+* **Documentation :** Apprendre à documenter correctement les petites applications et les fragments de code.
 
-* **Langages :** JavaScript, Python, Rust.
-* **Frameworks :** React, Next.js, Django.
-* **Outils :** Git, Neovim (avec LazyVim !), Docker.
+## 📁 Structure du Dépôt
+
+La structure est simple et axée sur la date ou le sujet :
