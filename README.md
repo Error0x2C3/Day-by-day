@@ -8,10 +8,9 @@
 ╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═════╝    ╚═╝       ╚═════╝ ╚═╝  ╚═╝   ╚═╝  
 ```
 
-<br>
-
 > **"Stronger Code !"**
-> — by [@luxluth](https://github.com/luxluth)
+>
+> — by [**@luxluth**](https://github.com/luxluth)
 
 ---
 
