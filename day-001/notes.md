@@ -9,5 +9,3 @@ A few words about what I built or explored.
 ### 💡 Insight
 One thing I learned or realized today.
 
-### 🔮 Next
-What I want to touch tomorrow.
