@@ -27,7 +27,7 @@ class ControllerSignup extends Controller {
                 "password" => $_POST["password"],
                 "confirm_password" => $_POST["confirm_password"]
             );
-            $is_corret = User::validate_all($_POST["full_name"],$_POST["email"] ,$_POST["pseudo"],$_POST["password"]);
+            $is_corret = User::validate($_POST["full_name"],$_POST["email"] ,$_POST["pseudo"],$_POST["password"]);
             $password_match = $_POST["password"] === $_POST["confirm_password"];
             if( empty($is_corret)){
                 if(User::persist($_POST["full_name"],$_POST["email"],$_POST["pseudo"], $_POST["password"] )){
