@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Bottom Bar</title>
+    <title>Browse Items</title>
     <base href="<?= $web_root ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -21,6 +21,15 @@
     </div>
 </nav>
 
+<div class="container py-4">
+    <h2 class="h5 mb-4 text-primary-emphasis">Items I'm Participating In</h2>
+    <div class="row g-4 mb-5">
+    </div>
+
+    <h2 class="h5 mb-4 text-primary-emphasis">Other Available Items</h2>
+    <div class="row g-4">
+    </div>
+</div>
 <nav class="bottom-nav">
     <?php $active = "browseItems"; ?>
     <div class="nav-wrap">
@@ -39,11 +48,12 @@
     </div>
 </nav>
 
+
 <div class="bottom-bar fixed-bottom">
     <div class="container-fluid  h-100 d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2 time-display">
             <i class="bi bi-clock"></i>
-            <span>10/11/25 20:55</span>
+            <span><?= AppTime::get_current_datetime_Other_format() ?></span>
         </div>
 
         <div class="right-actions d-flex gap-2">
