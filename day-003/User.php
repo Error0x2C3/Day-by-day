@@ -277,41 +277,7 @@ class User extends Model {
             if($file['error']== 0){
                 if($this->check_format_picture($file)){
                     if($file['size'] <=Configuration::get("picture_size_max")){
-                        // 1. Définir le répertoire de base.
-                        $upload_dir = "uploads/user/".$this->get_id()."/";
-
-                        // 2. Créer le dossier s'il n'existe pas encore.
-                        if (!file_exists($upload_dir)) {
-                            // mkdir crée le dossier, 0755 sont les permissions standards, true permet de créer les dossiers parents.
-                            mkdir($upload_dir, 0755, true);
-                        }
-
-                        // 3. Nettoyer le nom de fichier.
-                        // On récupère le nom sans l'extension originale et on enlève les caractères spéciaux.
-                        $original_name = pathinfo($file['name'], PATHINFO_FILENAME);
-                        $clean_name = preg_replace('/[^A-Za-z0-9\-]/', '_', $original_name); // Remplace tout sauf lettres/chiffres par _
-                        $filename = $clean_name . ".jpg";
-
-                        // 4. Chemin complet de destination.
-                        $dest_path = $upload_dir . $filename;
-                        $thumb_path = $upload_dir . "thumb_" . $filename;
-
-                        // Version Principale (1080px/1080px).
-                        // 6. ENREGISTREMENT EN BDD
-                        $success1 = $this->process_and_save_image(
-                            $file['tmp_name'],
-                            $dest_path,
-                            Configuration::get("picture_user_dim_max_vr_princiaple")
-                        );
-
-                        // Version Vignette (360px/360px).
-                        $success2 = $this->process_and_save_image(
-                            $file['tmp_name'],
-                            $thumb_path,
-                            Configuration::get("picture_user_dim_max_vr_vignette")
-                        );
-
-                        return $filename; // On retourne le nom pour l'enregistrer en BDD
+                        return $this->create_picture( $file); // On retourne true si tout c'est bien passé.
                     }else{
                         $error['image_size'] = "La taille de l'image est trop grande.";
                     }
@@ -329,10 +295,55 @@ class User extends Model {
         }
         return $error;
     }
+
+    /*
+    Crée les images si la vérification  l'image s'est bien passée.
+    Reçois en paramètre $_FILES['picture'].
+    */
+    private function create_picture(Array $file): bool {
+        // 1. Définir le répertoire de base.
+        $upload_dir = "uploads/user/".$this->get_id()."/";
+
+        // 2. Créer le dossier s'il n'existe pas encore.
+        if (!file_exists($upload_dir)) {
+            // mkdir crée le dossier, 0755 sont les permissions standards, true permet de créer les dossiers parents.
+            mkdir($upload_dir, 0755, true);
+        }
+
+        // 3. Nettoyer le nom de fichier.
+        // On récupère le nom sans l'extension originale et on enlève les caractères spéciaux.
+        $original_name = pathinfo($file['name'], PATHINFO_FILENAME);
+        $clean_name = preg_replace('/[^A-Za-z0-9\-]/', '_', $original_name); // Remplace tout sauf lettres/chiffres par _
+        $filename = $clean_name . ".jpg";
+
+        // 4. Chemin complet de destination.
+        $dest_path = $upload_dir . $filename;
+        $thumb_path = $upload_dir . "thumb_" . $filename;
+
+        // 5. Création des deux versions :
+        // Version Principale (1080px/1080px).
+        $success1 = $this->process_and_save_image(
+            $file['tmp_name'],
+            $dest_path,
+            Configuration::get("picture_dim_max_vr_princiaple")
+        );
+        // Version Vignette (360px/360px).
+        $success2 = $this->process_and_save_image(
+            $file['tmp_name'],
+            $thumb_path,
+            Configuration::get("picture_dim_max_vr_vignette")
+        );
+        if($success1 && $success2){
+            if($this->update_picture($dest_path) && $this->update_picture($thumb_path)){
+                return true;
+            }
+        }
+        return false;
+    }
     /*
      Redimensionne, compresse et convertit une image en JPEG.
      */
-    private function process_and_save_image($tmp_name, $dest_path, $max_size, $quality = 80) {
+    private function process_and_save_image($tmp_name, $dest_path, $max_size, $quality = 80):bool {
         // 1. Récupérer les dimensions et le type.
         list($width, $height, $type) = getimagesize($tmp_name);
 
@@ -373,6 +384,12 @@ class User extends Model {
 
         return $result;
     }
+
+    public function update_picture():bool{
+        $this->set_picture_path();
+        return false;
+    }
+
     // Enregistre les données d'un utilisateur qui vient de s'inscrire.
     // Création d'un nouvel objet dans la BDD.
     public static  function persist($full_name, $email, $pseudo, $password): User|bool{
@@ -398,8 +415,6 @@ class User extends Model {
     // Mets à jours les informations dans la BDD.
     public function save(): PDOStatement
     {
-        // On ne re-hash PAS le mot de passe si l'utilisateur n'a pas changé son mot de passe
-        // => tu dois gérer un champ $this->passwordHasChanged ou autre
         $sql = "
         UPDATE users
         SET 
