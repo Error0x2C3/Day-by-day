@@ -1,0 +1,345 @@
+:root{
+    /* Gére barre en haut */
+    --top-bar-h: 42px;
+    /* Gére la barre en bas */
+    --bottom-bar-h: 36px;
+    --nav-bar-h: 64px;
+    --glass: rgba(255,255,255,.06);
+
+    --txt: rgba(255,255,255,.78);
+    --txt-dim: rgba(255,255,255,.70);
+    --nav-bg: #1e293b;
+    --active: #60a5fa;
+;
+}
+
+/* =========================================================
+   LAYOUT GLOBAL
+   Le body sert UNIQUEMENT au layout (barres fixes)
+   ========================================================= */
+
+/* le contenu ne passe pas sous les 2 barres */
+body{
+    padding-top: var(--top-bar-h);
+    padding-bottom: calc(var(--bottom-bar-h) + var(--nav-bar-h));
+}
+
+
+/* =========================================================
+   TOP NAVIGATION BAR
+   ========================================================= */
+
+.top-nav{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--top-bar-h);
+    z-index: 11000;
+
+    background: var(--nav-bg); /* = #1e293b */
+
+    /* ✅ pas d'ombre portée */
+    box-shadow: none;
+
+    /* ✅ juste des traits fins (séparation) */
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    border-top: 1px solid rgba(0,0,0,.35);
+}
+
+/* wrapper interne */
+.top-wrap{
+    height: 100%;
+    display: flex;
+    align-items: center;
+
+    /* le bouton Save reste à droite */
+    justify-content: flex-end;
+
+    /* espace réservé pour le bouton retour */
+    padding-left: 52px;   /* 32px bouton + marge */
+    padding-right: 12px;
+
+    /* 🔑 nécessaire pour positionner retour + titre en absolute */
+    position: relative;
+}
+
+/* =========================================================
+   TITRE CENTRAL (toujours parfaitement centré)
+   ========================================================= */
+
+.top-nav .brand{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    text-decoration: none;
+    color: var(--active);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    font-weight: 600;
+    letter-spacing: .02em;
+    font-size: .9rem;
+}
+
+.top-nav .brand i{
+    font-size: 1rem;
+    opacity: .95;
+}
+
+.top-nav .brand-name{
+    line-height: 1;
+}
+
+
+/* =========================================================
+   BOUTON RETOUR (icon-only, ghost, comme app mobile)
+   ========================================================= */
+/* ===== Bouton retour (top bar) – icône seule ===== */
+.btn-return{
+    /* positionnement inchangé */
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+
+    /* ❌ plus de fond, plus de contour */
+    background: transparent;
+    border: none;
+
+    /* couleur de la flèche */
+    color: #5999ea;
+    text-decoration: none;
+
+    transition:
+            color .15s ease,
+            transform .05s ease;
+}
+
+.btn-return i{
+    font-size: 1.2rem; /* un peu plus lisible comme sur la 2e image */
+}
+
+/* hover : juste un léger éclaircissement */
+.btn-return:hover{
+    color: #7bb0ff;
+}
+
+/* état pressé */
+.btn-return:active{
+    transform: translateY(calc(-50% + 1px));
+}
+
+
+/* =========================================================
+   BOTTOM NAVIGATION
+   ========================================================= */
+
+.bottom-nav{
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--bottom-bar-h);
+    height: var(--nav-bar-h);
+    z-index: 10000;
+
+    /* couleur exacte */
+    background: var(--nav-bg);
+
+    /* ❌ aucune ombre */
+    box-shadow: none;
+
+    /* séparations fines, nettes */
+    border-top: 1px solid rgba(255,255,255,.06);
+    border-bottom: 1px solid rgba(0,0,0,.35);
+
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* layout interne (marges/spacing comme screenshot) */
+.bottom-nav .nav-wrap{
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 28px;
+}
+
+/* items */
+.bottom-nav .nav-item-btn{
+    text-decoration: none;
+    color: var(--txt);
+    width: 130px;
+    padding: 6px 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    font-size: 12px;
+    line-height: 1;
+}
+
+/* icônes */
+.bottom-nav .nav-item-btn i{
+    font-size: 18px;
+    opacity: .95;
+}
+
+/* actif (Browse en bleu) */
+.bottom-nav .nav-item-btn.active{
+    color: var(--active);
+}
+.bottom-nav .nav-item-btn.active i{
+    color: var(--active);
+}
+
+/* Hover doux */
+.bottom-nav .nav-item-btn:hover{
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.95);
+}
+
+
+/* =========================================================
+   BOTTOM BAR (heure, actions)
+   ========================================================= */
+
+.bottom-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--bottom-bar-h);
+
+    display: flex;
+    align-items: center;
+
+    /* voile clair translucide */
+    background: rgba(255, 255, 255, 0.06);
+
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.8rem;
+}
+
+.bottom-bar > .container-fluid{
+    height: 100%;
+}
+
+.time-display{
+    font-size: .78rem;
+    letter-spacing: .02em;
+    opacity: .9;
+}
+.time-display i{
+    font-size: .85rem;
+    opacity: .85;
+}
+
+
+/* =========================================================
+   BOUTONS TOOLBAR (pixel perfect)
+   ========================================================= */
+
+.right-actions .btn-time,
+.right-actions .btn-reset{
+    appearance: none !important;
+    -webkit-appearance: none !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+
+    height: 24px !important;
+    padding: 0 10px !important;
+
+    font-size: .75rem !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+
+    background: rgba(42,46,50,.55) !important;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    border-radius: 5px !important;
+    border: 1px solid transparent !important;
+
+    cursor: pointer !important;
+    user-select: none;
+
+    transition:
+            background .12s ease,
+            border-color .12s ease,
+            transform .05s ease;
+}
+
+/* Jaune */
+.right-actions .btn-time{
+    color: rgb(220,175,80) !important;
+    border-color: rgba(220,175,80,.55) !important;
+}
+.right-actions .btn-time:hover{
+    background: rgba(220,175,80,.16) !important;
+}
+
+/* Rouge */
+.right-actions .btn-reset{
+    color: rgb(230,90,90) !important;
+    border-color: rgba(230,90,90,.55) !important;
+}
+.right-actions .btn-reset:hover{
+    background: rgba(230,90,90,.18) !important;
+}
+
+/* état pressé */
+.right-actions .btn-time:active,
+.right-actions .btn-reset:active{
+    transform: translateY(1px);
+    background: rgba(0,0,0,.35) !important;
+}
+
+.right-actions i{
+    font-size: .78rem !important;
+    opacity: .9;
+}
+
+
+/*
+=========================================================
+ARCHITECTURE À RETENIR (IMPORTANT)
+
+👉 Mettre un wrapper partout.
+👉 Le body = layout (barres fixes).
+👉 Le wrapper = contenu (padding, scroll).
+
+<body>
+  <main class="page-content p-3">
+    <!-- contenu -->
+  </main>
+
+  <!-- barres globales -->
+</body>
+
+Avantages :
+✅ Plus jamais de bug avec les barres fixes
+✅ Structure identique partout
+✅ Mobile-safe
+=========================================================
+*/
