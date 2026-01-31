@@ -1,55 +1,14 @@
 <?php
 require_once "framework/Model.php";
 Class Bids extends Model{
-    //TODO Save ok + persist ok + getter ok + setter ok + validations.
     // La clé primaire est composée des colonnes owner, item et created_at.
     private int $owner_id;
-        private int $item_id;
-        private DateTime $created_at;
-        private float $amount;
+    private int $item_id;
+    private DateTime $created_at;
+    private float $amount;
     public function __construct(int $owner_id,int $item_id, DateTime $created_at,int $amount){
-        /*
-        Il n'est pas possible de faire une offre d'achat sur
-        une annonce clôturée (période d'enchères terminée
-        ou prix d'achat immédiat atteint).
-        Il n'est pas non plus possible de faire une offre d'achat
-        sur une annonce que l'on possède soi-même ou sur une annonce qui n'a pas encore débuté.
-         */
-        $item = Items::get_Item_instance_ById($item_id);
-        if($item->should_close() || $item->get_owner_id() == $owner_id ||  !$item->has_started()){
-            throw new InvalidArgumentException(
-                "Il n'est pas possible de faire une offre d'achat sur cette annonce."
-            );
-        }
-        $this->owner_id = $owner_id;
-        $this->item_id = $item_id;
-        if(!$this->validate_created_at($created_at,$item)) {
-            throw new InvalidArgumentException(
-                "La date de crétion de l'offre n'est pas bonne."
-            );
-        }else{
-            $this->created_at = $created_at;
-        }
-        /*
-          amount, de type DECIMAL(10,2), doit être strictement supérieur
-          au montant de l'offre la plus élevée déjà faite sur l'annonce
-          (ou supérieure à starting_bid si aucune offre n'a encore été faite,
-          ou égale à buy_now_price dans le cadre d'un achat immédiat).
-           */
-        if($item->has_auction()){
-            if($amount <= 0 && !preg_match(Configuration::get("decimal_regles"),(string)$amount) && !$this->validate_amount($item_id,$amount,1)){
-                throw new InvalidArgumentException(
-                    "Le montant de l'enchère doit être positif."
-                );
-            }
-        }else if($item->has_buy_now()){
-            if(!$this->validate_amount($item_id,$amount,2)){
-                throw new InvalidArgumentException(
-                    "Le montant de l'enchère doit être positif."
-                );
-            }
-        }
-        $this->amount = $amount;
+        // Vérifie les règles métiers.
+        $this->validate_construct($owner_id,$item_id,$created_at,$amount);
     }
 
     public function get_owner_id(): int{
@@ -94,8 +53,25 @@ Class Bids extends Model{
         return false;
     }
 
+    // Vérifie si l'utilisateur existe.
+    public function validate_owner_id(int $owner_id):bool{
+        if(User::getUserById($owner_id)){
+            return true;
+        }
+        return false;
+    }
+
+    // Vérifie si l'annonce existe.
+    public function validate_item_id($item_id):bool{
+        if(!Items::get_Item_instance_ById($item_id) instanceof Items){
+            // Alors $item_id est faux.
+            return false;
+        }
+        return true;
+    }
     // Vérifie si la date de création de l'offre est compris entre celle du début de l'annonce et sa fin.
-    public function validate_created_at(DateTime $created_at, Items $item):bool{
+    public function validate_created_at(DateTime $created_at, int$item_id):bool{
+        $item = Items::get_Item_instance_ById($item_id);
         if($created_at >= $item->get_created_at() && $created_at <= $item->time_passed()){
             return true;
         }
@@ -103,17 +79,24 @@ Class Bids extends Model{
     }
 
     /*
-    Le montant d'une offre d'achat doit toujours être supérieur
-    au montant de l'offre la plus élevée déjà faite sur l'annonce,
-    (ou à l'enchère minimale si aucune offre n'a encore été faite).
-     */
-    public function validate_amount($item_id, $amount,int $option):bool{
-        // Option 1 item a un système d'enchère et d'achat immédiat.
-        // option 2 item a juste un système d'achat immédiat.
-        if($option == 1 ){
+    amount, de type DECIMAL(10,2), doit être strictement supérieur
+    au montant de l'offre la plus élevée déjà faite sur l'annonce
+    (ou supérieure à starting_bid si aucune offre n'a encore été faite,
+    ou égale à buy_now_price dans le cadre d'un achat immédiat).
+    */
+    public function validate_amount($item_id, $amount):bool{
+        $item = Items::get_Item_instance_ById($item_id);
+        if(!preg_match(Configuration::get("decimal_regles"),(string)$amount)){
+            return false;
+        }
+        if($item->has_auction() && !$item->has_buy_now()){
             return $this->validate_amount_for_aunction($item_id, $amount);
-        }elseif ($option == 2){
+        }
+        if ($item->has_buy_now() && !$item->has_auction()){
             return $this->validate_amount_for_buy_now($item_id, $amount);
+        }
+        if($item->has_buy_now() && $item->has_auction()){
+            return $this->validate_amount_for_aunction($item_id, $amount) && $this->validate_amount_for_buy_now($item_id, $amount);
         }
         return false;
     }
@@ -175,6 +158,44 @@ Class Bids extends Model{
         }
     }
 
+    /*
+    Il n'est pas possible de faire une offre d'achat sur
+    une annonce clôturée (période d'enchère terminée
+    ou prix d'achat immédiat atteint).
+    Il n'est pas non plus possible de faire une offre d'achat
+    sur une annonce que l'on possède soi-même ou sur une annonce qui n'a pas encore débutée.
+    */
+    public function cannot_bid($item_id,$owner_id):bool{
+        $item = Items::get_Item_instance_ById($item_id);
+        if($item->should_close() || $item->get_owner_id() == $owner_id ||  !$item->has_started()){
+            return true;
+        }
+        return false;
+    }
+
+    public function validate_construct(int $owner_id,int $item_id, DateTime $created_at,int $amount):void {
+        if($this->validate_owner_id($owner_id)){
+            $this->owner_id = $owner_id;
+        }else{ throw new InvalidArgumentException("L'utilisateur n'existe pas.");}
+
+        if($this->validate_item_id($item_id)){
+            $this->item_id = $item_id;
+        }else{throw new InvalidArgumentException("L'annonce n'existe pas.");}
+
+        if($this->validate_created_at($created_at,$item_id)) {
+            $this->created_at = $created_at;
+        }else{ throw new InvalidArgumentException("La date de crétion de l'offre n'est pas bonne.");}
+
+        if($this->validate_amount($item_id, $amount)){
+            $this->amount = $amount;
+        }else{throw new InvalidArgumentException("Le montant de l'enchère doit être positif.");}
+
+        if($this->cannot_bid($item_id,$owner_id)){
+            throw new InvalidArgumentException(
+                "Il n'est pas possible de faire une offre d'achat sur
+         cette annonce");
+        }
+    }
     /*
     Mets à jours les informations dans la BDD.
     Seule la colonne amount a besoin d'être modifiée
