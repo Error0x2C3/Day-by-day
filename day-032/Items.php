@@ -22,11 +22,24 @@ class Items extends Model {
         int $owner_id,
         ?float $buy_now_price,
         ?float $starting_bid,
-        int $id
+        int $id,
+        bool $verif_regle_metier =true
     ) {
         // Vérifie les règles métiers.
-        $this->validate_contruct($title,$description,$created_at,$duration_days,$owner_id,$buy_now_price,$starting_bid);
+        if($verif_regle_metier){
+            $this->validate_contruct($title,$description,$created_at,$duration_days,$owner_id,$buy_now_price,$starting_bid);
+            $this->id = $id;
+        }else
+        {
+            $this->title = $title;
+        $this->description = $description;
+        $this->created_at = $created_at;
+        $this->duration_days = $duration_days;
+        $this->owner_id = $owner_id;
+        $this->buy_now_price = $buy_now_price;
+        $this->starting_bid = $starting_bid;
         $this->id = $id;
+        }
     }
     private $errors = [];
     public function get_title(): string
@@ -53,7 +66,7 @@ class Items extends Model {
     {
         return $this->duration_days;
     }
-    public function get_starting_bid(): ?int{
+    public function get_starting_bid(): ?float{
         /*
         NULL => Pas d’enchères possibles.
         0    => Pas d’enchères possibles.
@@ -100,7 +113,7 @@ class Items extends Model {
     }
     public function set_starting_bid(int $price):bool{
         if($this->validate_starting_bid($price)){
-            $this->buy_now_price= $price;
+            $this->starting_bid= $price;
             return true;
         }
         return false;
@@ -113,21 +126,12 @@ class Items extends Model {
         return false;
     }
 
-     /*
-     * vérifie si le chemin de la photo respecte bien les règles métiers.
-     */
-    public static function validate_picture_path($picture_path): bool {
-        if(file_exists($picture_path)){
-            return true;
-        }
-        return false;
-    }
 
-    public function validate_contruct($title,$description,$created_at,$duration_days,$owner_id,$buy_now_price,$starting_bid):void{
+    public function validate_contruct(string $title,?String $description,DateTime $created_at,int $duration_days,int $owner_id,?float $buy_now_price,?float $starting_bid):void{
         if($this->validate_title($title,$owner_id)){
             $this->title = $title;
         }else{throw new InvalidArgumentException("Le titre n'est pas bon.");}
-        if($this->validate_description($description) || empty($description)){
+        if($this->validate_description($description) || $description =="" || $description == null){
             // Peut être vide ou null.
             $this->description = $description;
         }else{throw new InvalidArgumentException("La description n'est pas bonne.");}
@@ -140,27 +144,37 @@ class Items extends Model {
         if($this->validate_owner_id($owner_id)){
             $this->owner_id = $owner_id;
         }else{throw new InvalidArgumentException("L'utilisateur n'existe pas.");}
-        if($this->validate_buy_now_price($buy_now_price) || empty($buy_now_price)){
+        if($this->validate_buy_now_price($buy_now_price,$starting_bid , $buy_now_price) || $buy_now_price=="" || $buy_now_price == null){
             // Peut être vide ou null.
             $this->buy_now_price = $buy_now_price;
         }else{throw new InvalidArgumentException("Ça ne respecte pas les règles.");}
-        if($this->validate_starting_bid($starting_bid) || empty($buy_now_price)){
+        if($this->validate_starting_bid($starting_bid) || $buy_now_price=="" || $buy_now_price == null){
             // Peut être vide ou null.
             $this->starting_bid = $starting_bid;
         }else{throw new InvalidArgumentException("Ça ne respecte pas les règles.");}
     }
 
+
+     /*
+     * vérifie si le chemin de la photo respecte bien les règles métiers.
+     */
+    public static function validate_picture_path($picture_path): bool {
+        if(file_exists($picture_path)){
+            return true;
+        }
+        return false;
+    }
     
     /* =========================================================
         Respect des règle métiers.
     ========================================================= */
 
     //Vérifie si le title vérifie bien les règles métiers .
-    public function validate_title(string $title): bool{
+    public function validate_title(string $title,$owner_id): bool{
         if(strlen($title) >= Configuration::get("title_item_min")){
             $pdo = self::execute("Select * from items where owner = :owner",
                 array(
-                    "owner"=>$this->get_owner_id()
+                    "owner"=>$owner_id
                 ));
             $array = $pdo->fetchAll(PDO::FETCH_ASSOC);
             foreach($array as $row){
@@ -178,11 +192,29 @@ class Items extends Model {
             echo strlen($string); => 0
          */
         if(strlen($description) > 0){
-            if(!strlen($description)>= Configuration::get("description_item_min")){
-                return false;
-            }else{return true;}
+            if(strlen($description)>= Configuration::get("description_item_min")){
+                return true;
+            }else{return false;}
         }
         return true;
+    }
+    public function validate_created_at($created_at):bool{
+        if($created_at instanceof DateTime){
+            return true;
+        }
+        return false;
+    }
+
+    // Vérifie que duration_days est entre 1 et 365
+    public function validate_duration_days($duration_days): bool{
+        return $duration_days >= Configuration::get("duration_days_min") && $duration_days <= Configuration::get("duration_days_max");
+    }
+
+    public function validate_owner_id($owner_id):bool{
+        if(User::get_user_by_id($owner_id) instanceof User){
+            return true;
+        }
+        return false;
     }
     public function validate_starting_bid(float $value): bool{
         /*
@@ -205,14 +237,14 @@ class Items extends Model {
     /*
     Si starting_bid == null => l'annonce doit avoir un buy_now_price.
      */
-    public function  validate_bid_or_buy_now_presence(): bool{
+    public function  validate_bid_or_buy_now_presence(bool $hasAuction, bool $hasBuyNow): bool{
         // S'il y a pas d'enchère => achat immédiat obligatoire.
-        if(!$this->has_auction() && !$this->has_buy_now()){
+        if(!$hasAuction && !$hasBuyNow){
             return false;
         }
         return true;
     }
-    public function validate_buy_now_price(float $value):bool{
+    public function validate_buy_now_price(float $value,?float $starting_bid ,?float $buy_now_price):bool{
         /*
         NULL => Pas d’enchères possibles valide.
         0    => Pas d’enchères possibles valide.
@@ -220,7 +252,12 @@ class Items extends Model {
         Starting_bid < 0 Invalides / Interdit non valide.
         Si starting_bid == null => l'annonce doit avoir un buy_now_price.
         */
-        if(!$this->validate_bid_or_buy_now_presence()){return false;}
+        // Est mis explicitement ici au lieu d'utilité les méthodes has_auction() et has_buy_now()
+        // Car la méthode est aussi appelé dans le constructeur.
+        $hasAuction = ($starting_bid !== null && $starting_bid > 0);
+        $hasBuyNow  = ($buy_now_price !== null && $buy_now_price > 0);
+
+        if(!$this->validate_bid_or_buy_now_presence($hasAuction,$hasBuyNow)){return false;}
         if($value > 0){
             // Si c'est > 0, alors doit respecter cette régle.
             if(preg_match(Configuration::get("decimal_regles"),(string)$value)) {
@@ -228,7 +265,7 @@ class Items extends Model {
                 si elle est remplie, doit être strictement supérieure à 0
                 et strictement supérieur à starting_bid (si starting_bid n'est pas nulle)
                  */
-                if($this->has_auction() && $value <= $this->get_starting_bid()){
+                if($hasAuction  && $value <= $starting_bid){
                     return false;
                 }
                 return true;
@@ -239,10 +276,7 @@ class Items extends Model {
         return true;
     }
 
-    // Vérifie que duration_days est entre 1 et 365
-    public function validate_duration_days(int $value): bool{
-        return $this->get_duration_days() >= Configuration::get("duration_days_min") && $this->get_duration_days() <= Configuration::get("duration_days_max");
-    }
+
     /* =========================================================
         Vérification Pour les annonces.
    ========================================================= */
@@ -311,7 +345,7 @@ class Items extends Model {
         $erro1 = false;
         $erro2 = false;
         // Validation du titre
-        if (strlen($this->title) >= Configuration::get("title_min_length") && strlen($this->title) <= Configuration::get("title_max_length")) {
+        if (strlen($this->title) < Configuration::get("title_min_length") || strlen($this->title) > Configuration::get("title_max_length")) {
             $errors["bool_text_min_3_max_255"] = "Title length must be between 3 and 255 characters.";
             $erro1 = true;
         }
@@ -352,8 +386,9 @@ class Items extends Model {
                                 WHERE b.item = :itemId 
                                 AND i.buy_now_price IS NOT NULL 
                                 AND i.buy_now_price > 0
-                                AND i.starting_bid > 0   
-                                ORDER BY b.amount ASC,b.created_at ASC
+                                AND i.starting_bid > 0  
+                                GROUP BY b.amount ASC, b.owner,b.item,b.created_at
+                                ORDER BY B.amount DESC, b.created_at ASC
                                 LIMIT 1",
                     array(
                         "itemId"=> $this->get_id(),
@@ -363,6 +398,7 @@ class Items extends Model {
                     return false;
                 }
                 $array = $pdo->fetch(PDO::FETCH_ASSOC);
+
                 return $array['owner'];
             }catch (PDOException $e) {
                 return false;
@@ -383,6 +419,9 @@ class Items extends Model {
     public function should_close(): bool {
 
         // 1) Clôture à la fin de la période.
+        /*
+        Si l’annonce a les deux systèmes (enchère + buy now) et que le temps est passé.
+         */
         if ($this->time_has_passed()) {
             return true;
         }
@@ -397,13 +436,12 @@ class Items extends Model {
                 return true;
             }
             return false;
-
         }
 
-        // 3) Clôture à la fin de la période si c’est une enchère seulement et que le temps est écoulé.
-        if ($this->has_auction() && !$this->has_buy_now() && $this->time_has_passed()) {
-            return true;
-        }
+//     // 3) Clôture à la fin de la période si c’est une enchère seulement et que le temps est écoulé.
+//        if ($this->has_auction() && !$this->has_buy_now() && $this->time_has_passed()) {
+//            return true;
+//        } => est déjà géré par la première condition.
         // 4) Clôture à la fin de la période si c'est un achât immédiat seulement et que le temps est écoulé
         if($this->has_buy_now() && !$this->has_auction()){
             // Si l'annonce a seulement un système d'achat immédiat, dès qu'une personne,
@@ -431,9 +469,10 @@ class Items extends Model {
                                 WHERE b.item = :itemId 
                                 AND i.buy_now_price IS NOT NULL 
                                 AND i.buy_now_price > 0
-                                AND i.starting_bid > 0     
+                                AND i.starting_bid > 0   
+                                AND i.starting_bid IS NOT NULL  
                                 AND b.amount >= i.buy_now_price
-                                ORDER BY b.amount ASC,b.created_at ASC
+                                ORDER BY b.created_at ASC
                                 LIMIT 1",
                 array(
                     "itemId"=> $this->get_id(),
@@ -510,7 +549,7 @@ class Items extends Model {
                                 AND i.starting_bid IS NOT NULL 
                                 AND i.starting_bid > 0
                                 AND (i.buy_now_price= 0 OR i.buy_now_price IS NULL)   
-                                AND b.amount >= i.buy_now_price
+                                AND b.amount >= i.starting_bid
                                 ORDER BY b.created_at ASC
                                 LIMIT 1",
                 array(
@@ -748,7 +787,7 @@ class Items extends Model {
             if (!$pdo) {
                 return false;
             }
-            return (int)$pdo;
+            return (int)$pdo->fetchColumn();
         } catch (PDOException $e) {
             return false;
         }
@@ -766,7 +805,7 @@ class Items extends Model {
                 ));
             // Si la requête ne trouve rien, il retourne false.
             if(!$pdo){return false;}
-            $max_bid = $pdo != null ? (int)$pdo : null;
+            $max_bid = $pdo != null ? (int)$pdo->fetchColumn() : null;
             return $max_bid;
         } catch (PDOException $e) {
             return false;
@@ -828,7 +867,7 @@ class Items extends Model {
     public function save():bool {
         try{
             $pdo = self::execute("
-                        UPDATE users
+                        UPDATE items
                         SET
                             title = :title,
                             description = :description,
@@ -842,10 +881,11 @@ class Items extends Model {
                     "title" => $this->get_title(),
                     "description" => $this->get_description(),
                     "owner" => $this->get_owner_id(),
-                    "created_at" => $this->get_created_at(),
+                    "created_at" => $this->get_created_at()->format("Y-m-d H:i:s"),
                     "buy_now_price" => $this->get_buy_now_price(),
                     "duration_days" => $this->get_duration_days(),
-                    "starting_bid" => $this->get_starting_bid()
+                    "starting_bid" => $this->get_starting_bid(),
+                    "id" => $this->get_id(),
                 )
             );
             if (!$pdo) {return false;}
@@ -873,7 +913,7 @@ class Items extends Model {
                     "title" => $title,
                     "description" => $description,
                     "owner" => $owner_id,
-                    "created_at" => $created_at->format('Y-m-d H:i:s'),
+                    "created_at" => $created_at->format("Y-m-d H:i:s"),
                     "buy_now_price" => $buy_now_price,   // null autorisé
                     "duration_days" => $duration_days,
                     "starting_bid" => $starting_bid
@@ -886,8 +926,8 @@ class Items extends Model {
         }
         
     }
-    public static function  get_user_item_picture_path_and_priority($item_id) :array{
 
+    public static function  get_user_item_picture_path_and_priority($item_id) :array{
         $pdo = self::execute(
             "SELECT picture_path,priority
              FROM item_pictures
@@ -902,128 +942,124 @@ class Items extends Model {
             return $array;
     }
     /*
- * Récupère un item par son ID et retourne un objet Items.
- */
-public static function get_Item_instance_ById(int $id): Items|bool
-{
-    $pdo = self::execute(
-        "SELECT *
-         FROM items
-         WHERE id = :id",
-        [
-            "id" => $id
-        ]
-    );
-
-    $item = $pdo->fetch(PDO::FETCH_ASSOC);
-
-    if ($item !== false) {
-        return new Items(
-            title:          $item["title"],
-            description:    $item["description"],
-            created_at:     new DateTime($item["created_at"]),
-            duration_days:  (int)$item["duration_days"],
-            owner_id:       (int)$item["owner"],
-            buy_now_price:  (float)$item["buy_now_price"],
-            starting_bid:   (int)$item["starting_bid"],
-            id:             (int)$item["id"]
+    * Récupère un item par son ID et retourne un objet Items.
+    */
+    public static function get_Item_instance_by_id(int $id): Items|bool
+    {
+        $pdo = self::execute(
+            "SELECT *
+             FROM items
+             WHERE id = :id",
+            [
+                "id" => $id
+            ]
         );
+
+        $item = $pdo->fetch(PDO::FETCH_ASSOC);
+
+        if ($item !== false) {
+            return new Items(
+                title:          $item["title"],
+                description:    $item["description"],
+                created_at:     new DateTime($item["created_at"]),
+                duration_days:  (int)$item["duration_days"],
+                owner_id:       (int)$item["owner"],
+                buy_now_price:  (float)$item["buy_now_price"],
+                starting_bid:   (float)$item["starting_bid"],
+                id:             (int)$item["id"],
+                verif_regle_metier: false
+            );
+        }
+
+        return false;
     }
 
-    return false;
+    public static function get_active_items_by_owner(int $owner): array
+    {
+        $pdo = self::execute(
+            "SELECT v.*, ip.picture_path
+             FROM v_items_status v
+             LEFT JOIN item_pictures ip
+                ON ip.item = v.id
+               AND ip.priority = (
+                    SELECT MIN(priority)
+                    FROM item_pictures
+                    WHERE item = v.id
+               )
+             WHERE v.owner = :owner
+               AND v.not_purchased_direct_sale = 1
+               AND (
+                    v.is_auction = 0
+                    OR (
+                        v.end_at > :now
+                        AND (NOT v.has_buy_now OR NOT v.buy_now_reached)
+                    )
+               )
+             ORDER BY v.end_at DESC",
+            [
+                "owner" => $owner,
+                "now"   => AppTime::get_current_datetime()
+            ]
+        );
+
+        return $pdo->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
+    public static function get_closed_unsold_items_by_owner(int $owner): array
+    {
+        $pdo = self::execute(
+            "SELECT v.*, ip.picture_path
+             FROM v_items_status v
+             LEFT JOIN item_pictures ip
+                ON ip.item = v.id
+               AND ip.priority = (
+                    SELECT MIN(priority)
+                    FROM item_pictures
+                    WHERE item = v.id
+               )
+             WHERE v.owner = :owner
+               AND v.end_at <= :now
+               AND v.has_bids = 0
+               AND v.buy_now_reached = 0
+             ORDER BY v.end_at DESC",
+            [
+                "owner" => $owner,
+                "now"   => AppTime::get_current_datetime()
+            ]
+        );
+
+        return $pdo->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public static function get_sold_items_by_owner(int $owner): array
+    {
+        $pdo = self::execute(
+            "SELECT v.*, ip.picture_path
+             FROM v_items_status v
+             LEFT JOIN item_pictures ip
+                ON ip.item = v.id
+               AND ip.priority = (
+                    SELECT MIN(priority)
+                    FROM item_pictures
+                    WHERE item = v.id
+               )
+             WHERE v.owner = :owner
+               AND (
+                    v.buy_now_reached = 1
+                    OR (v.end_at <= :now AND v.has_bids = 1)
+               )
+             ORDER BY v.end_at DESC",
+            [
+                "owner" => $owner,
+                "now"   => AppTime::get_current_datetime()
+            ]
+        );
+
+        return $pdo->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 
-public static function get_active_items_by_owner(int $owner): array
-{
-    $pdo = self::execute(
-        "SELECT v.*, ip.picture_path
-         FROM v_items_status v
-         LEFT JOIN item_pictures ip
-            ON ip.item = v.id
-           AND ip.priority = (
-                SELECT MIN(priority)
-                FROM item_pictures
-                WHERE item = v.id
-           )
-         WHERE v.owner = :owner
-           AND v.not_purchased_direct_sale = 1
-           AND (
-                v.is_auction = 0
-                OR (
-                    v.end_at > :now
-                    AND (NOT v.has_buy_now OR NOT v.buy_now_reached)
-                )
-           )
-         ORDER BY v.end_at DESC",
-        [
-            "owner" => $owner,
-            "now"   => AppTime::get_current_datetime()
-        ]
-    );
 
-    return $pdo->fetchAll(PDO::FETCH_ASSOC);
-}
-
-
-
-public static function get_closed_unsold_items_by_owner(int $owner): array
-{
-    $pdo = self::execute(
-        "SELECT v.*, ip.picture_path
-         FROM v_items_status v
-         LEFT JOIN item_pictures ip
-            ON ip.item = v.id
-           AND ip.priority = (
-                SELECT MIN(priority)
-                FROM item_pictures
-                WHERE item = v.id
-           )
-         WHERE v.owner = :owner
-           AND v.end_at <= :now
-           AND v.has_bids = 0
-           AND v.buy_now_reached = 0
-         ORDER BY v.end_at DESC",
-        [
-            "owner" => $owner,
-            "now"   => AppTime::get_current_datetime()
-        ]
-    );
-
-    return $pdo->fetchAll(PDO::FETCH_ASSOC);
-}
-
-
-public static function get_sold_items_by_owner(int $owner): array
-{
-    $pdo = self::execute(
-        "SELECT v.*, ip.picture_path
-         FROM v_items_status v
-         LEFT JOIN item_pictures ip
-            ON ip.item = v.id
-           AND ip.priority = (
-                SELECT MIN(priority)
-                FROM item_pictures
-                WHERE item = v.id
-           )
-         WHERE v.owner = :owner
-           AND (
-                v.buy_now_reached = 1
-                OR (v.end_at <= :now AND v.has_bids = 1)
-           )
-         ORDER BY v.end_at DESC",
-        [
-            "owner" => $owner,
-            "now"   => AppTime::get_current_datetime()
-        ]
-    );
-
-    return $pdo->fetchAll(PDO::FETCH_ASSOC);
-}
-
-
-
-
-
-
-
-}
