@@ -1,0 +1,66 @@
+.title-participating {
+    color: #5999ea; !important;
+}
+
+.other-available-items {
+    color: #5999ea; !important;
+}
+.card-title-custom {
+    color: #f4f4f5;              /* blanc légèrement cassé */
+    font-size: 1.05rem;          /* taille proche de l’image */
+    font-weight: 600;            /* semi-bold */
+    line-height: 1.3;
+    margin: 0 0 6px 0; /* 👈 ESPACE ICI */
+
+    /* Coupe le texte proprement */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;       /* max 2 lignes */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    letter-spacing: 0.2px;
+}
+.card-owner-custom .by {
+    opacity: 0.6;
+    margin-right: 2px;
+}
+
+.card-owner-custom {
+    margin: 0;
+    margin-top: 2px;
+
+    font-size: 0.78rem;          /* petit comme sur l’image */
+    font-weight: 400;
+
+    color: #9ca3af;              /* gris bleuté UI */
+    opacity: 0.9;
+
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+
+    text-transform: none;        /* pas de majuscules */
+}
+.card-starting-bid-custom {
+    color: #d08812;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+
+    margin-top: 10px;
+    margin-bottom: 6px;
+
+    letter-spacing: 0.02em;
+}
+
+.card-buy-now-price-custom {
+    color: #3980f1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+
+    margin-top: 10px;
+    margin-bottom: 6px;
+
+    letter-spacing: 0.02em;
+}
