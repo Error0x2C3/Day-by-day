@@ -8,7 +8,7 @@
 ╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═════╝    ╚═╝       ╚═════╝ ╚═╝  ╚═╝   ╚═╝  
 ```
 
-> **"Stronger Code !"**
+> **"Code Harder !"**
 >
 > — by [**@luxluth**](https://github.com/luxluth)
 
