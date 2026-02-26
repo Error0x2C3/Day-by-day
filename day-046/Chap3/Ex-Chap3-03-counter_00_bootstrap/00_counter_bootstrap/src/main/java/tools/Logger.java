@@ -19,12 +19,16 @@ public class Logger  implements Observer {
     public void update(Observable o, Object arg) {
         if(o instanceof CounterModel){
             System.out.println(((CounterChangeType) arg).name()+" :");
+            System.out.println("------------------------------------------------");
             System.out.println("La valeur actuel est : " +((CounterModel) o).get_nbr());
+            System.out.println("------------------------------------------------");
         }
         if(o instanceof User){
             if(!((User) o).get_user_name().isEmpty()) {
                 System.out.println(((CounterChangeType) arg).name()+" :");
+                System.out.println("------------------------------------------------");
                 System.out.println("Le nom de l'utilisateur actuel est : " + ((User) o).get_user_name());
+                System.out.println("------------------------------------------------");
             }
         }
     }
