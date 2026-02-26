@@ -127,20 +127,30 @@ public class CounterView extends VBox{
                         btn_less.setOnAction(e->{
                             try{
                                 counter_model.set_nbr( counter_model.get_nbr()-1 );
-                                String txt = String.valueOf(counter_model.get_nbr());
-                                /*
+                                System.out.println(counter_model.get_nbr());
+                                 /*
                                 Chaque appel à setText efface
                                 entièrement le texte précédent du composant.
                                 Dès que la ligne de code est exécutée,
                                 l'interface graphique se rafraîchit pour l'utilisateur.
                                 */
-                                label_text_number.setText(txt);
-                                System.out.println(counter_model.get_nbr());
+                                label_text_number.setText( String.valueOf(counter_model.get_nbr()) );
+                                /*
+                                Cas ou si btn + est bloqué ( car counter_model.get_nbr() == 3), dès que je clique sur le btn -,
+                                counter_model.get_nbr() == 2 et donc le btn + doit être réactivé.
+                                 */
+                                btn_add.setDisable(false);
                             } catch (RuntimeException ex) {
                                 String txt = String.valueOf(counter_model.get_nbr());
                                 label_text_number.setText(txt);
                                 System.out.println(counter_model.get_nbr());
                                 if(counter_model.btn_less_must_be_disabled()){
+                                    /*
+                                    Pour gérer le cas ou :
+                                    Si je clique sur + jusqu'à atteindre 3 btn + désactivé,
+                                    Si par après je clique sur - jusqu'à atteindre -3 btn - désactivé.
+                                    Me voilà avec les deux btn désactivés.
+                                     */
                                     btn_less.setDisable(true);
                                     btn_add.setDisable(false);
                                 }
@@ -203,17 +213,28 @@ public class CounterView extends VBox{
                         btn_add.setOnAction(e->{
                             try {
                                 counter_model.set_nbr( counter_model.get_nbr()+1);
-                                label_text_number.setText(String.valueOf(counter_model.get_nbr()));
+                                System.out.println(counter_model.get_nbr());
                                 /*
                                 Chaque appel à setText efface
                                 entièrement le texte précédent du composant.
                                 Dès que la ligne de code est exécutée,
                                 l'interface graphique se rafraîchit pour l'utilisateur.
                                 */
-                                System.out.println(counter_model.get_nbr());
+                                label_text_number.setText(String.valueOf(counter_model.get_nbr()));
+                                /*
+                                Cas ou si btn - est désactivé ( car counter_model.get_nbr() == -3),
+                                dès que je clique sur le btn +, btn - doit être réactivé car counter_model.get_nbr() == 2.
+                                 */
+                                btn_less.setDisable(false);
                             } catch (RuntimeException ex) {
                                 System.out.println(counter_model.get_nbr());
                                 if(counter_model.btn_add_must_disabled()){
+                                    /*
+                                    Pour gérer le cas ou :
+                                    Si je clique sur + jusqu'à atteindre 3 btn + désactivé,
+                                    Si par après je clique sur - jusqu'à atteindre -3 btn - désactivé.
+                                    Me voilà avec les deux btn désactivés.
+                                     */
                                     btn_add.setDisable(true);
                                     btn_less.setDisable(false);
                                 }
