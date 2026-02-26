@@ -1,39 +1,22 @@
-package view;
+package counter;
 
+import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import model.CounterModel;
-import model.User;
+import javafx.stage.Stage;
 
-/*
-CounterView hérite de la classe VBox de JavaFX.
-Elle correspond à la partie de la vue qui
-implémente le compteur et ses différents
-éléments graphiques (bordure, champ texte, libellés et boutons).
- */
-public class CounterView extends VBox{
-    private BorderPane root_border_panne;
-    private CounterModel counter_model;
-    private User user;
-    public CounterView(BorderPane root_border_panne, CounterModel counter_model){
-        this.root_border_panne = root_border_panne; // le BoderPane qui contiendra toutes les autres scènes.
-        this.counter_model = counter_model;
-        this.user = new User();
-    }
-    public BorderPane get_root_border_panne(){
-        return this.root_border_panne; // border_panne vierge par défaut.
-    }
-    public CounterModel get_counter_model(){
-        return this.counter_model;
-    }
-    public User get_user(){return this.user;}
-
-     /*
+public class CounterApp extends Application {
+    Integer nbr = (int)(Math.random() * (3 - (-3) + 1)) + (-3); // Chiffre au hasard entre -3 et 3 compris.
+    @Override
+    // Stage (la fenêtre) > Scene (le contenu de la fenêtre) > Root (l'organisation des éléments).
+    /*
     STRUCTURE GENERALE :
 
     BorderPane :
@@ -41,52 +24,44 @@ public class CounterView extends VBox{
             1 ère colonne : le label
             2 ème colonne : un Hbox range les éléments de façon verticale.
      */
-
-    // On ajoute des scènes dans le BoderPanel vierge.
-    public BorderPane get_border_panel(){
-        // BorderPane root_border_panne = new BorderPane();
+    public void start(Stage stage) {
+        BorderPane root_border_panne = new BorderPane();
         /*
         setPadding définit la marge intérieure (l'espace vide)
         entre la bordure de mon conteneur (BorderPane)
         et les éléments que je vais mettre à l'intérieur.
         new Insets(top, right, bottom, left).
          */
-        // this.get_root_border_panne().setPadding(new Insets(20,20,20,20));
-        // ajout de La VBox dans le BorderPane.
-        // --------------
-            this.get_vbox_panel();
-        // --------------
-        return  this.get_root_border_panne();
-    }
-    public VBox get_vbox_panel(){
+        root_border_panne.setPadding(new Insets(20,20,20,20));
+
         // Début de la VBox.
-        // ------------------------------------------------
+            // ------------------------------------------------
             VBox vbox_panel = new VBox(5); // Impose un espace de 5 px entre chaque étage.
             vbox_panel.setPadding(new Insets(15,15,15,15)); // Un espace de 15 px entre la bordure de la VBox et les éléments à l'intérieur.
             // Définit une bordure noire de 1 pixel et une couleur de fond (optionnel) sur la VBox.
             vbox_panel.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-border-style: solid;");
-            // Je mets la VBox  au centre de la scene BorderPane vierge.
-            this.get_root_border_panne().setCenter(vbox_panel);
+            // Je mets la VBox  au centre de la scene BorderPane.
+            root_border_panne.setCenter(vbox_panel);
             /*
             Dans une VBox, les éléments s'empilent
             dans l'ordre où je les ajoute au code.
             Le premier ajouté est en haut, le dernier est en bas.
              */
             // Au 1 er étage de la VBox :
-            // ------------------------------------------------------
+            // ---------------------------------------------------------------------------------
                 TextField textField_name_user = new TextField();
-                this.get_user().set_user_name(textField_name_user.getText());
                 /*
                 setAlignment(Pos.CENTER)
                 pour que le texte ne reste pas collé à gauche
-                à l'intérieur du champ.
+                à l'intérieur du champ mais soit bien au milieu.
                 Utile pour les label, pas pour TextField.
-                */
+                 */
                 textField_name_user.setAlignment(javafx.geometry.Pos.CENTER);
                 // J'ajoute le texte dans la VBox.
                 vbox_panel.getChildren().add(textField_name_user);
-                // Ajout du message d'erreur:
-                // --------------------------------------------------------
+
+                // Ajout du message d'erreur :
+                    // --------------------------------------------------------
                     textField_name_user.setOnAction(e ->{
                         // Tout ce qui est ici est "mis en attente"
                         // et ne s'exécute QUE si :
@@ -96,17 +71,15 @@ public class CounterView extends VBox{
                         //    supprime ceux qui sont des étiquettes de texte de type (Label) ET qui contiennent un message spécifique "Trimmed".
                         vbox_panel.getChildren().removeIf(node -> node instanceof Label && ((Label)node).getText().contains("Trimmed") );
                         // 2. On récupère le texte et on vérifie la condition.
-                        // Mets à jour la variable user_name du model.
-                        this.get_user().set_user_name(textField_name_user.getText());
-                        if( this.user.message_error_must_be_display()){
+                        if(textField_name_user.getText().trim().length() < 3){
                             // On ajoute le message d'erreur.
                             // Le message d'erreur sera ajouté ET affiché après l'élément qui se trouve à l'index X-1.
                             vbox_panel.getChildren().add(1,label_text_error_name_user()); // L'index dans ce cas = numéro de l'étage dans la VBox.
                         }
                     });
                 // --------------------------------------------------------
-            // ------------------------------------------------------
-            // Fin du 1 er étage de la VBox.
+            // ---------------------------------------------------------------------------------
+            // Fin de la 1 ère étage de la VBox.
             // Au 2 ème étage de la VBox :
             // ---------------------------------------------------------------------------------
                 // Début de la HBox :
@@ -125,42 +98,26 @@ public class CounterView extends VBox{
                         hbox_panel.getChildren().add(btn_less);
                         // Se désactive si nbr est sup à 3 ou inf à -3 et fait -1 à nbr.
                         btn_less.setOnAction(e->{
-                            try{
-                                counter_model.set_nbr( counter_model.get_nbr()-1 );
-                                System.out.println(counter_model.get_nbr());
-                                 /*
-                                Chaque appel à setText efface
-                                entièrement le texte précédent du composant.
-                                Dès que la ligne de code est exécutée,
-                                l'interface graphique se rafraîchit pour l'utilisateur.
-                                */
-                                label_text_number.setText( String.valueOf(counter_model.get_nbr()) );
-                                /*
-                                Cas ou si btn + est bloqué ( car counter_model.get_nbr() == 3), dès que je clique sur le btn -,
-                                counter_model.get_nbr() == 2 et donc le btn + doit être réactivé.
-                                 */
+                            nbr--;
+                            String txt = String.valueOf(nbr);
+                            /*
+                            Chaque appel à setText efface
+                            entièrement le texte précédent du composant.
+                            Dès que la ligne de code est exécutée,
+                            l'interface graphique se rafraîchit pour l'utilisateur.
+                            */
+                            label_text_number.setText(txt);
+                            System.out.println(nbr);
+                            if(nbr <= -3){
+                                btn_less.setDisable(true);
                                 btn_add.setDisable(false);
-                            } catch (RuntimeException ex) {
-                                String txt = String.valueOf(counter_model.get_nbr());
-                                label_text_number.setText(txt);
-                                System.out.println(counter_model.get_nbr());
-                                if(counter_model.btn_less_must_be_disabled()){
-                                    /*
-                                    Pour gérer le cas ou :
-                                    Si je clique sur + jusqu'à atteindre 3 btn + désactivé,
-                                    Si par après je clique sur - jusqu'à atteindre -3 btn - désactivé.
-                                    Me voilà avec les deux btn désactivés.
-                                     */
-                                    btn_less.setDisable(true);
-                                    btn_add.setDisable(false);
-                                }
                             }
                         });
                     // ----------------------------------------
 
                     // Affichage du chiffre au milieu du HBox.
                     // ----------------------------------------
-                        label_text_number.setText(String.valueOf(counter_model.get_nbr()));
+                        label_text_number.setText(String.valueOf(nbr));
                         label_text_number.setStyle("-fx-text-fill: black; -fx-font-weight: bold;");
                         /*
                         On va dire à l'élément du milieu (mon Label) qu'il doit prendre
@@ -204,41 +161,20 @@ public class CounterView extends VBox{
                         // Ajout du texte dans le Hbox.
                         hbox_panel.getChildren().add(label_text_number);
                     // ----------------------------------------
+
                     // Bouton pour le "+" ET gestion.
                     // ----------------------------------------
-                        // btn_add = new Button("+");
+                    // btn_add = new Button("+");
                         // Ajout du btn dans le HBox.
                         hbox_panel.getChildren().add(btn_add);
                         // Se désactive si nbr est sup à 3 ou inf à -3 et fais +1 à nbr.
                         btn_add.setOnAction(e->{
-                            try {
-                                counter_model.set_nbr( counter_model.get_nbr()+1);
-                                System.out.println(counter_model.get_nbr());
-                                /*
-                                Chaque appel à setText efface
-                                entièrement le texte précédent du composant.
-                                Dès que la ligne de code est exécutée,
-                                l'interface graphique se rafraîchit pour l'utilisateur.
-                                */
-                                label_text_number.setText(String.valueOf(counter_model.get_nbr()));
-                                /*
-                                Cas ou si btn - est désactivé ( car counter_model.get_nbr() == -3),
-                                dès que je clique sur le btn +, btn - doit être réactivé car counter_model.get_nbr() == 2.
-                                 */
+                            nbr++;
+                            label_text_number.setText(String.valueOf(nbr));
+                            System.out.println(nbr);
+                            if(nbr >= 3){
+                                btn_add.setDisable(true);
                                 btn_less.setDisable(false);
-                            } catch (RuntimeException ex) {
-                                System.out.println(counter_model.get_nbr());
-                                if(counter_model.btn_add_must_disabled()){
-                                    /*
-                                    Pour gérer le cas ou :
-                                    Si je clique sur + jusqu'à atteindre 3 btn + désactivé,
-                                    Si par après je clique sur - jusqu'à atteindre -3 btn - désactivé.
-                                    Me voilà avec les deux btn désactivés.
-                                     */
-                                    btn_add.setDisable(true);
-                                    btn_less.setDisable(false);
-                                }
-
                             }
                         });
                     // ----------------------------------------
@@ -246,14 +182,42 @@ public class CounterView extends VBox{
                 // Fin de la HBox.
             // ---------------------------------------------------------------------------------
             // Fin de la 2 ème étage de la VBox.
-        // ------------------------------------------------
+            // ------------------------------------------------
         // Fin de la VBox.
-        return vbox_panel;
+
+        /*
+        root_border_panne (le contenu) mon premier arguement.
+        Je dis :
+            Mon contenu principal sera ce BorderPane
+            (que j'ai nommé root_border_panne).
+            Tout ce que j'ai ajouté dans root_border_panne
+            sera affiché dans cette scène.
+         new Scene(root_border_panne,largeur de la fenêtre en pixels,longeur de la fenêtre en pixels);
+         */
+        Scene scene = new Scene(root_border_panne,300,150);
+        stage.setTitle("Counter");
+        // Je donne la scene à la fenêtre.
+        stage.setScene(scene);
+        // Je montre la fenêtre.
+        stage.show();
+
     }
-    // Gestion du message d'erreur et de son style CSS.
+
+    /*
+    STRUCTURE GENERALE :
+
+    BorderPane :
+        au Centre un Vbox :
+            1 ère colonne : le label
+            2 ème colonne : un Hbox range les éléments de façon verticale.
+     */
+    public static void main(String[] args) {
+        launch();
+    }
+
     public Label label_text_error_name_user(){
 
-        Label label_text_error = new Label(this.get_user().get_message_error_name_user());
+        Label label_text_error = new Label("Trimmed length must be >= 3.");
         // Texte en rouge.
         label_text_error.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
         label_text_error.setAlignment(javafx.geometry.Pos.CENTER);
@@ -261,4 +225,3 @@ public class CounterView extends VBox{
         return  label_text_error;
     }
 }
-
