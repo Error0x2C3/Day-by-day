@@ -31,6 +31,7 @@ public class CounterView extends VBox{
     public CounterModel get_counter_model(){
         return this.counter_model;
     }
+    public User get_user(){return this.user;}
 
      /*
     STRUCTURE GENERALE :
@@ -74,7 +75,7 @@ public class CounterView extends VBox{
             // Au 1 er étage de la VBox :
             // ------------------------------------------------------
                 TextField textField_name_user = new TextField();
-                this.user.set_user_name(textField_name_user.getText());
+                this.get_user().set_user_name(textField_name_user.getText());
                 /*
                 setAlignment(Pos.CENTER)
                 pour que le texte ne reste pas collé à gauche
@@ -96,7 +97,7 @@ public class CounterView extends VBox{
                         vbox_panel.getChildren().removeIf(node -> node instanceof Label && ((Label)node).getText().contains("Trimmed") );
                         // 2. On récupère le texte et on vérifie la condition.
                         // Mets à jour la variable user_name du model.
-                        this.user.set_user_name(textField_name_user.getText());
+                        this.get_user().set_user_name(textField_name_user.getText());
                         if( this.user.message_error_must_be_display()){
                             // On ajoute le message d'erreur.
                             // Le message d'erreur sera ajouté ET affiché après l'élément qui se trouve à l'index X-1.
@@ -231,7 +232,7 @@ public class CounterView extends VBox{
     // Gestion du message d'erreur et de son style CSS.
     public Label label_text_error_name_user(){
 
-        Label label_text_error = new Label(this.user.get_message_error_name_user());
+        Label label_text_error = new Label(this.get_user().get_message_error_name_user());
         // Texte en rouge.
         label_text_error.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
         label_text_error.setAlignment(javafx.geometry.Pos.CENTER);
