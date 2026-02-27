@@ -4,6 +4,16 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.value.ChangeListener;
 
+/*
+Dans une architecture propre (comme le MVC : Modèle-Vue-Contrôleur),
+c'est toujours la Vue (ou son Contrôleur) qui crée ces ChangeListener.
+
+Le Modèle ne doit rien savoir de l'interface graphique.
+Son seul travail, c'est de stocker les données (les Properties) et
+de crier dans le mégaphone quand elles changent.
+
+C'est à la Vue de tendre l'oreille pour savoir quand mettre à jour l'écran.
+ */
 public class Main {
     public static void main(String[] args) {
         //Création du modèle

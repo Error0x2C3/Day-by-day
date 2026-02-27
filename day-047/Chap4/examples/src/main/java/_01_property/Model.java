@@ -45,7 +45,22 @@ class Model {
         (le fameux if (nbr > 0) par exemple).
     ----------------------------------------------------------
 
-    2. Côté Vue : De l'entonnoir géant à la précision chirurgicale
+    2. Côté "Main" (ou assemblage) : Ciblage plus précis
+    ----------------------------------------------------------
+    Avant :
+        Je devais ajouter toute une classe comme observateur du modèle tout entier.
+        Ex :
+            counter_model.addObserver(counter_view);
+       Lorsqu'une seule variable du "Modèle" change toute la "Vue" est au courant.
+
+    Maintenant :
+        J'ajoute directement changeListener (l'écouteur qu'on a créé dans la "Vue") seul comme observateur de la variable Property (côté "Model").
+        Ex :
+             model.anyValueProperty().addListener(changeListener);
+        Lorsqu'une seule variable Property du "Modèle" change seule le changeListener de la "Vue" est au courant.
+     ----------------------------------------------------------
+
+    3. Côté Vue : De l'entonnoir géant à la précision chirurgicale
     ----------------------------------------------------------
     Avant (l'entonnoir) :
         La méthode @Override public void update(...) recevait
@@ -63,7 +78,7 @@ class Model {
         Plus besoin de trier les événements !
     ----------------------------------------------------------
      */
-    private final IntegerProperty anyValue = new SimpleIntegerProperty(), // Réprésente n'importe quel entier Observable.
+    private final IntegerProperty anyValue = new SimpleIntegerProperty(), // Réprésente n'importe quel entier + Observable.
         positiveValue = new SimpleIntegerProperty(), // Représente un entier positif Observable.
         wrongPositiveValue = new SimpleIntegerProperty();  // Représente un entier positif Observable.
 
@@ -123,7 +138,4 @@ class Model {
         this.wrongPositiveValue.set(positiveVal);
     }
 
-    public String test(){
-        return "test";
-    }
 }
