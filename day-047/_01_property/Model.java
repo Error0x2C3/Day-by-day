@@ -15,7 +15,7 @@ class Model {
             this.value = nbr;
             this.setChanged();
             this.notifyObservers();
-        }
+    }
     Donc on a plus besoin d'ajouter les deux dernières lignes :
     this.setChanged();
     this.notifyObservers();
@@ -28,6 +28,40 @@ class Model {
     de prévenir tous ceux qui l'observent que la valeur a changé.
     Le code "passe-partout" (boilerplate) disparaît,
     ce qui rend tes classes beaucoup plus propres.
+
+    La différence entre Observable/Observer ET Property :
+
+    1. Côté Modèle : La fin du code "poubelle" (Boilerplate)
+       l'objet Property fusionne la variable (la donnée) et le mécanisme de notification.
+    ----------------------------------------------------------
+    Avant :
+        Le développeur devait penser à prévenir
+        tout le monde à la main à chaque modification
+        (setChanged() + notifyObservers()).
+        Si je l'oubliais, mon interface graphique ne se mettait pas à jour.
+    Maintenant :
+        La propriété s'occupe de sa propre tuyauterie interne.
+        Moi, je me concentres uniquement sur mes règles métier
+        (le fameux if (nbr > 0) par exemple).
+    ----------------------------------------------------------
+
+    2. Côté Vue : De l'entonnoir géant à la précision chirurgicale
+    ----------------------------------------------------------
+    Avant (l'entonnoir) :
+        La méthode @Override public void update(...) recevait
+        absolument toutes les notifications de l'objet observé.
+        Si mon modèle avait 15 variables (le score, la vie, le nom, le temps...), l'update() recevait les 15.
+        Je devais alors écrire un if / else if / else if géant pour essayer de deviner qui avait changé et quoi mettre à jour.
+        C'était lourd et difficile à lire.
+    Maintenant (le sur-mesure) :
+        C'est chirurgical. J'ai une variable = une propriété.
+        Et je peux coller un ChangeListener spécifique (via une petite lambda)
+        directement sur la propriété qui m'intéresse.
+        Ex :
+            Un écouteur juste pour la vie : vieProperty.addListener(...)
+            Un autre juste pour le score : scoreProperty.addListener(...)
+        Plus besoin de trier les événements !
+    ----------------------------------------------------------
      */
     private final IntegerProperty anyValue = new SimpleIntegerProperty(), // Réprésente n'importe quel entier Observable.
         positiveValue = new SimpleIntegerProperty(), // Représente un entier positif Observable.
