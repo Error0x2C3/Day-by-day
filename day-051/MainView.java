@@ -1,18 +1,20 @@
 package scratch.view;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
 public class MainView extends VBox {
-    private final VBox root_vbox = new VBox();
-    // 2 ème  ligne de root_vbox.
-    private final HBox  root_second_hbox= new HBox();
-    private final VBox root_third_palette_action = new VBox(), root_third_programme = new VBox(),root_third__vbox_scene = new VBox();
 
+
+    public MainView() {
+        configComponents();
+    }
 
     // Assemblage de la structure des scènes JavaFx
     private void configComponents() {
+        VBox root_vbox = new VBox();
         // --------------Enfants de la root_vbox--------------
         // 1 ère ligne de root_vbox.
         MenuBar menu_bar = create_menu_bar();
@@ -27,14 +29,13 @@ public class MainView extends VBox {
         // On donne plus d'espace à la scène de dessin et au programme.
         HBox.setHgrow(colonne_centre, Priority.ALWAYS);
         HBox.setHgrow(colonne_droite, Priority.ALWAYS);
-        root_second_hbox.getChildren().addAll(colonne_gauche,colonne_centre);
+
+        root_second_hbox_colonnes.getChildren().addAll(colonne_gauche,colonne_centre,colonne_droite);
         // ------Enfants de root_second_hbox_colonnes------
 
         // --------------Enfants de la root_vbox--------------
-        root_vbox.getChildren().addAll(menu_bar,root_second_hbox_colonnes);
-
-    }
-    public MainView() {
+        // root_vbox.getChildren().addAll(menu_bar,root_second_hbox_colonnes);
+        this.getChildren().addAll(menu_bar,root_second_hbox_colonnes);
 
     }
 
@@ -81,6 +82,7 @@ public class MainView extends VBox {
         root_vbox_programme.getChildren().add(listView_palette_programme);
 
         HBox boutons_box = new HBox(5);
+        boutons_box.setAlignment(Pos.CENTER);
         // -------Enfants de boutons_box-------
         Button btn_monter = new Button("Monter"), btn_descendre = new Button("Descendre"), btn_dupliquer = new Button("Dupliquer"),
         btn_supprimer = new Button("Supprimer"), btn_vider_tout = new Button("Vider tout");
@@ -113,14 +115,16 @@ public class MainView extends VBox {
 
     public VBox creer_colonne_droite(){
         VBox root_third__vbox_scene = new VBox(10);
-        root_second_hbox.getChildren().add(root_third__vbox_scene);
         // ----------------------------Enfants de root_third_palette_action ---------------------------------------
+        Label label_scene = new Label("Scène");
+        root_third__vbox_scene.getChildren().add(label_scene);
         Pane dessinPane = new Pane();
         dessinPane.setPrefSize(400, 400); // Taille par défaut
         dessinPane.setStyle("-fx-background-color: white; -fx-border-color: lightgray;");
         root_third__vbox_scene.getChildren().add(dessinPane);
 
         HBox boutons_box = new HBox(5);
+        boutons_box.setAlignment(Pos.CENTER);
         root_third__vbox_scene.getChildren().add(boutons_box);
         // -----Enfants de boutons_box-----
         Button btn_reinit = new Button("Ré-initialiser"), btn_suivant = new Button("Suivant");
