@@ -1,0 +1,182 @@
+/******************************************
+  Checks de la table Restaurants
+******************************************/
+
+/* 1.Le nom doit avoir au minimum une longueur de 5 caractÃ¨res. */
+
+ALTER TABLE restaurants
+    DROP CONSTRAINT IF EXISTS check_name;
+
+ALTER TABLE restaurants
+    ADD CONSTRAINT check_name
+        CHECK (LENGTH(TRIM(name)) >= 5);
+
+/* 2.L'adresse doit avoir au minimum une longueur de 5 caractÃ¨res. */
+
+ALTER TABLE restaurants
+    DROP CONSTRAINT IF EXISTS check_address;
+
+ALTER TABLE restaurants
+    ADD CONSTRAINT check_address
+        CHECK (LENGTH(TRIM(address)) >= 5);
+
+/* 3.La ville doit avoir au minimum une longueur de 3 caractÃ¨res. */
+
+ALTER TABLE restaurants
+    DROP CONSTRAINT IF EXISTS check_city;
+
+ALTER TABLE restaurants
+    ADD CONSTRAINT check_city
+        CHECK (LENGTH(TRIM(city)) >= 3);
+
+/* 4.Le numÃ©ro de tÃ©lÃ©phone doit avoir un format de numÃ©ro belge valide,
+    et peut Ãªtre encodÃ© avec ou sans espaces de sÃ©paration entre les groupes de chiffres. (Ã  terminer) */
+
+ALTER TABLE restaurants
+    DROP CONSTRAINT IF EXISTS check_phone_number;
+
+ALTER TABLE restaurants
+    ADD CONSTRAINT check_phone_number
+        CHECK (phone ~ '');
+
+/* 5.La description, si elle est fournie, doit avoir au minimum une longueur de 10 caractÃ¨res. */
+
+ALTER TABLE restaurants
+    DROP CONSTRAINT IF EXISTS check_description;
+
+ALTER TABLE restaurants
+    ADD CONSTRAINT check_description
+        CHECK (LENGTH(TRIM(description)) >= 10);
+
+/* 6.La note doit Ãªtre comprise entre 0.0 et 5.0 si elle est dÃ©finie. */
+
+ALTER TABLE restaurants
+    DROP CONSTRAINT IF EXISTS check_rating;
+
+ALTER TABLE restaurants
+    ADD CONSTRAINT check_rating
+        CHECK (rating BETWEEN 0.0 AND 5.0);
+
+/* 7.La fourchette de prix doit Ãªtre comprise entre 1 et 4 si elle est dÃ©finie. */
+
+ALTER TABLE restaurants
+    DROP CONSTRAINT IF EXISTS check_price_range;
+
+ALTER TABLE restaurants
+    ADD CONSTRAINT check_price_range
+        CHECK (price_range BETWEEN 1 AND 4);
+
+/* 8.La durÃ©e de crÃ©neau de rÃ©servation doit Ãªtre soit 10, 15, 20, 30 ou 60 minutes. */
+
+ALTER TABLE restaurants
+    DROP CONSTRAINT IF EXISTS check_slot_duration;
+
+ALTER TABLE restaurants
+    ADD CONSTRAINT check_slot_duration
+        CHECK (slot_duration IN (10, 15, 20, 30, 60));
+
+/******************************************
+  Checks de la table Tables
+******************************************/
+
+/* 1.Le numÃ©ro de table doit Ãªtre strictement positif et unique au sein d'un mÃªme restaurant. */
+
+ALTER TABLE tables
+    DROP CONSTRAINT IF EXISTS check_positif;
+
+ALTER TABLE tables
+    ADD CONSTRAINT check_positif
+        CHECK (table_number > 0);
+
+/* 2.La capacitÃ© doit Ãªtre strictement positive. */
+
+ALTER TABLE tables
+    DROP CONSTRAINT IF EXISTS check_capa_positif;
+
+ALTER TABLE tables
+    ADD CONSTRAINT check_capa_positif
+        CHECK (capacity > 0);
+
+/* 3.On ne peut pas modifier le restaurant d'une table. */
+
+CREATE OR REPLACE FUNCTION  prevent_restaurant_table_update()
+    RETURNS trigger as $$
+BEGIN
+    IF NEW.restaurant <> OLD.restaurant THEN
+        RAISE EXCEPTION 'Impossible de modifier le restaurant d''une table';
+    END IF;
+    RETURN NULL;
+END;
+$$LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_prevent_restaurant_table_update ON tables;
+
+CREATE TRIGGER trg_prevent_restaurant_table_update
+    BEFORE UPDATE ON tables
+    FOR EACH ROW
+EXECUTE FUNCTION prevent_restaurant_table_update();
+
+
+/*
+
+Utilisateurs :
+
+      doit contenir au moins un chiffre, une lettre majuscule,
+
+      une lettre minuscule et un caractÃ¨re spÃ©cial parmi les suivants : ,;.:!?/$%&@#.
+
+    -Le mot de passe doit Ãªtre stockÃ© de maniÃ¨re sÃ©curisÃ©e (hachage + sel).
+
+On ne peut pas modifier le rÃ´le d'un utilisateur.
+
+ */
+
+/******************************************
+  Checks de la table Utilisateurs
+******************************************/
+/* --- Contrainte d'unicitÃ© ---*/
+alter table users
+    drop constraint if exists email_unique;
+
+ALTER TABLE users
+    ADD CONSTRAINT email_unique
+        UNIQUE (email); --Voir schÃ©ma consigne--
+
+Alter TABLE users
+    drop constraint if exists full_name_unique;
+
+ALTER TABLE users
+    ADD CONSTRAINT full_name_unique
+        UNIQUE (full_name);--Voir schÃ©ma consigne--
+/* --- Contrainte d'unicitÃ© ---*/
+ 
+alter table users
+    drop constraint if exists count_nom;
+/* Le nom complet doit avoir une longueur d'au moins 3 caractÃ¨res. */
+alter table users
+    add constraint count_nom
+        check (LENGTH(TRIM(full_name)) >= 3);
+
+/* Le mot de passe doit avoir au minimum une longueur de 8 caractÃ¨res, doit contenir au moins un chiffre, une lettre majuscule, une lettre minuscule et un caractÃ¨re spÃ©cial parmi les suivants : ,;.:!?/$%&@#.*/
+drop function if exists passe_word_limit();
+drop trigger if exists passe_word_limit_trigger on users;
+
+create or replace function passe_word_limit()
+    returns trigger as
+$$
+begin
+    if tg_op = 'INSERT' OR  tg_op = 'UPDATE' then
+        if LENGTH(TRIM(new.password)) < 8 AND not (new.password ~ '^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[,;.:!?/$%&@#.]).+$') then
+            raise exception using message = 'invalid password';
+        END IF;
+    END IF;
+    return null;
+end;
+$$LANGUAGE plpgsql;
+
+create or replace trigger  passe_word_limit_trigger
+    before insert or update -- on peut crÃ©er un trigger pour plusieurs Ã©vÃ©nements (ici insert et update)
+    on users
+    for each row
+execute function passe_word_limit(); -- on indique la fonction Ã  exÃ©cuter
+
