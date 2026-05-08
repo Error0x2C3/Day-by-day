@@ -56,7 +56,6 @@ Each folder = **one day = one improvement**.
 
 ---
 
-
 # 📜 Commit Agreement
 
 To keep a clear record of my progress, I use the following convention for my commit messages :
@@ -78,7 +77,6 @@ To keep a clear record of my progress, I use the following convention for my com
 * perf :     Improving the performance of an existing project, feature, or exercise.
 * refactor : Code clean up or refactoring without functional changes.
 
-Ex : build(ex1 chap1 tuto): from PRBDD.
 ---
 
 # 🧰 Technologies Used
