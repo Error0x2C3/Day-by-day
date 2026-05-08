@@ -56,16 +56,39 @@ Each folder = **one day = one improvement**.
 
 ---
 
+
+# 📜 Commit Agreement
+
+To keep a clear record of my progress, I use the following convention for my commit messages :
+
+```txt
+
+<type>(<scope>): <short summary>
+  │       │             │
+  │       │             └─⫸ A brief summary of what is included in the commit.
+  │       │
+  │       └─⫸ Commit Scope: the name of the project associated with this commit | none.
+  │
+  └─⫸ Type : build|docs|feat|fix|perf|refactor.
+```
+* build :    Setting up a new project, fiscal year, or daily log.
+* docs :     Changes to the documentation (README, notes.md, diagrams).
+* feat :     Development of a new feature or coding exercise.
+* fix :      Fixing an error or bug in previous code.
+* perf :     Improving the performance of an existing project, feature, or exercise.
+* refactor : Code clean up or refactoring without functional changes.
+
+Ex : build(ex1 chap1 tuto): from PRBDD.
+---
+
 # 🧰 Technologies Used
 
 You will see appear over the days:
 
 * Java / JavaFX
-* C / Rust 🦀
-* Python
-* Linux / Arch scripts
-* Web: HTML, CSS, JS etc.
-* Configs for Neovim, Hyprland, etc.
+* Dart / Postgresql
+* C / C++
+* Web: HTML, CSS, PHP, JS etc...
 
 ---
 
