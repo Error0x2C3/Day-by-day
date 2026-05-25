@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Delete item confirmation</title>
+    <title>Delete category confirmation</title>
     <base href="<?= $web_root ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -15,9 +15,8 @@
 
 <body class="bg-dark text-light">
 <?php
-if(isset($item) && isset($btn_back)){
-    echo Navigation::top_bar("item/delete_confirm_item_view/".$item->get_id()."/".Navigation::encode($btn_back),"Delete item confirmation","","");
-
+if(isset($category)){
+    echo Navigation::top_bar("categories/delete_category_confirm_view/".$category->get_id(),"Delete category confirmation","","");
 }
 ?>
 <main class="p-3 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
@@ -38,15 +37,15 @@ if(isset($item) && isset($btn_back)){
             <hr class="custom-hr mb-4">
 
             <p class="delete-text mb-4">
-                Do you really want to delete item <strong><?= $item->get_title()?></strong> by <?=$owner->get_full_Name()?> and all of its dependencies ?
+                Do you really want to delete category <strong><?= $category->get_name()?></strong> category ?
                 <br><br>
                 This process cannot be undone.
             </p>
 
             <div class="d-flex justify-content-center gap-3 mb-2">
-                <a href="<?=$btn_back[1]?>" type="button" class="btn btn-cancel rounded-3">Cancel</i></a>
+                <a href="categories/categories_view" type="button" class="btn btn-cancel rounded-3">Cancel</i></a>
                 <!--$btn_back[0]; Ex: item/my_items_view/-->
-                <a href="item/delete_item/<?=$item->get_id()?>/<?=Navigation::encode($btn_back[0])?>" type="button" class="btn btn-delete rounded-3">Delete</i></a>
+                <a href="categories/delete/<?=$category->get_id()?>" type="button" class="btn btn-delete rounded-3">Delete</i></a>
             </div>
 
         </div>
