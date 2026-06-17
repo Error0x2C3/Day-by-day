@@ -1,0 +1,7 @@
+Fasts solutions : 
+
+For : 
+gpg: signing failed: Inappropriate ioctl for device
+Solution : 
+export GPG_TTY=$(tty) 
+
