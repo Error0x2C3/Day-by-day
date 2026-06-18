@@ -388,7 +388,7 @@ RETURNS SETOF json AS $$
                         and r.restaurant = restaurant_id
                         -- Pour avoir la réservation correspondant au jour prvis de la réseration ( mais pas à la même heure).
                         --  timestamp ex: 2024-12-05 20:00:00 / Date ex: 2024-12-05.
-                        and r.datetime::date = restaurant_date::date
+                        and r.datetime::date = restaurant_date::date -- Important car service_id_for_réservation n'a les services que tous Mardis par ex de la semaine.
                         and r.status in ('confirmed','completed') -- A travers ça on a les tables occupées.
                         and r.id != reservation_id -- On exclu notre réservation.
                         -- Trie sur Service
@@ -430,6 +430,7 @@ RETURNS void AS $$
         INSERT INTO reservation_tables (reservation, "table")
         -- déroule la liste des int, et insére chaque élément de la liste d'int.
         SELECT reservation_id, unnest(table_ids);
+
     END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

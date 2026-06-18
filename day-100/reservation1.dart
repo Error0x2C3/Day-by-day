@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:prbd_2526_f02/core/services/api_client.dart';
-import 'package:prbd_2526_f02/models/table.dart' as model;
+import 'Restaurant.dart';
 import 'table.dart';
 import 'user.dart';
 
@@ -37,6 +37,7 @@ class Reservation {
     this.tables
   });
 
+  // FromJson c'est de json à modèle, Ex: transformer json en instance de réservation.
   factory Reservation.fromJson(Map<String, dynamic> json){
     return Reservation(
       id: json['id'],
@@ -61,6 +62,7 @@ class Reservation {
     );
   }
 
+  // De modèle à json, Ex: transforme une instance en json.
   Map<String, dynamic> toJson(){
     return{
       'id': id,
@@ -133,7 +135,7 @@ class Reservation {
     }
   }
 
-  static Future<void> cancelReservation(int reservationId)async{
+  static Future<void> cancelReservation(int reservationId) async {
     final response = await ApiClient.post(
       'cancel_reservation',
       body: json.encode({'reservation_id': reservationId}),
@@ -182,13 +184,12 @@ class Reservation {
     }
   }
 
-  static Future<List<String>> fetchAvailableSlots(int restaurantId, DateTime date) async {
+  static Future<List<String>> fetchAvailableSlots(int restaurantId, DateTime date, {int? reservationId}) async {
     final dateString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2,'0')}";
-
-    final response = await ApiClient.get(
-      'get_available_slots?restaurantid=$restaurantId&datechosen=$dateString',
-    );
-
+    String endpoint = reservationId == null
+        ? 'get_available_slots?restaurantid=$restaurantId&datechosen=$dateString' :
+    'get_available_slots?restaurantid=$restaurantId&datechosen=$dateString&reservationid=$reservationId';
+    final response = await ApiClient.get(endpoint);
     if (response.statusCode == 200){
       final List<dynamic> data = json.decode(response.body);
       return data.map((item) => item['time'] as String).toList();
@@ -197,41 +198,19 @@ class Reservation {
     }
   }
 
-  static Future<List<String>> fetchAvailableSlotsEdition(int restaurantId, DateTime date) async {
-    final dateString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2,'0')}";
-
-    final response = await ApiClient.get(
-      'get_available_slots_edition?restaurantid=$restaurantId&datechosen=$dateString',
-    );
-
-    if (response.statusCode == 200){
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((item) => item['time'] as String).toList();
-    }else{
-      throw Exception('Échec du chargement des créneaux : ${response.statusCode}');
-    }
-  }
-  static Future<bool> checkCapacityWarning(int restaurantId, DateTime vDateTime, int guests) async {
-    final response = await ApiClient.get('check_capacity_warning?restaurantid=$restaurantId&p_datetime=${vDateTime.toIso8601String()}&guests=$guests'
-    );
+  static Future<int> getAvailableCapacity(int restaurantId, DateTime vDateTime, {int? reservationId}) async {
+    String endpoint = reservationId == null ?
+    'get_available_capacity?restaurantid=$restaurantId&p_datetime=${vDateTime.toIso8601String()}' :
+    'get_available_capacity?restaurantid=$restaurantId&p_datetime=${vDateTime.toIso8601String()}&reservationid=$reservationId';
+    final response = await ApiClient.get(endpoint);
 
     if (response.statusCode == 200){
-      return json.decode(response.body) as bool;
+      return json.decode(response.body);
     }else{
       throw Exception('Échec du chargement des capacités : ${response.statusCode}');
     }
   }
 
-  static Future<bool> checkCapacityWarningEdition(int reservationId,int restaurantId, DateTime vDateTime, int guests) async {
-    final response = await ApiClient.get('check_capacity_warning_edition?reservation_id=$reservationId&restaurant_id=$restaurantId&p_datetime=${vDateTime.toIso8601String()}&guests=$guests'
-    );
-
-    if (response.statusCode == 200){
-      return json.decode(response.body) as bool;
-    }else{
-      throw Exception('Échec du chargement des capacités : ${response.statusCode}');
-    }
-  }
   static Future<void> createReservation(int restaurantId, DateTime vDateTime, int guests, String requests) async {
     final response = await ApiClient.post(
       'create_reservation',
@@ -262,6 +241,22 @@ class Reservation {
     }
   }
 
+  static Future<Map<String, dynamic>> getFormContext(int restaurantId, DateTime date , {int? reservationId}) async {
+    final dateString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2,'0')}";
+
+    String endpoint = reservationId == null
+        ? 'get_form_context?restaurantid=$restaurantId&date=$dateString'
+        : 'get_form_context?restaurantid=$restaurantId&date=$dateString&reservationid=$reservationId';
+
+    final response = await ApiClient.get(endpoint);
+
+    if(response.statusCode == 200){
+      return json.decode(response.body);
+    }else{
+      throw Exception('Échec du chargement du contexte : ${response.statusCode}');
+    }
+  }
+
   static Future<void> updateReservationEdition(int reservationId, DateTime newDatetime, int guests, String requests) async {
     final response = await ApiClient.post(
       'update_reservation_edition',
@@ -277,8 +272,50 @@ class Reservation {
     }
   }
 
+  static Future<Reservation> confirmAndAssignTables(int reservationId, List<int> tableIds) async {
+    final response = await ApiClient.post(
+      'confirm_reservation_with_tables',
+      body: json.encode({
+        'reservation_id': reservationId,
+        'table_ids': tableIds,
+      }),
+    );
+    if (response.statusCode == 200) {
+      final dynamic body = json.decode(response.body);
+      return Reservation.fromJson(body);
+    } else {
+      throw Exception('Échec du chargement des réservations via id: ${response.statusCode}');
+    }
+  }
 
+  // Donne le restaurant liée à la réseration.
+  static Future<void> getRestaurantByIdReservation(int reservationId) async {
+    final response = await ApiClient.post(
+      'get_restaurant_by_reservation',
+      body: json.encode({
+        'reservation_id': reservationId,
+      }),
+    );
+    if (response.statusCode != 200  && response.statusCode != 204){
+      throw Exception('Échec de la création : ${response.body}');
+    }
+  }
 
+  static Future<Restaurant> getRestaurantByReservation(int reservationId) async {
+    // On utilise ApiClient.get avec le paramètre p_reservation_id
+    final response = await ApiClient.get(
+        'get_restaurant_by_reservation?reservation_id=$reservationId'
+        );
+    if (response.statusCode == 200) {
+      // On décode le corps de la réponse (qui est un objet JSON unique).
+      final dynamic body = json.decode(response.body);
+      // On transforme le JSON en objet Restaurant via son constructeur fromJson.
+        return Restaurant.fromJson(body);
+    } else {
+      // En cas d'erreur (404, 500, etc.), on lance une exception.
+      throw Exception('Échec du chargement du restaurant pour la réservation $reservationId : ${response.statusCode}');
+    }
+  }
   @override
   String toString() {
     return 'Reservation(id: $id, '
@@ -293,4 +330,5 @@ class Reservation {
         'owner: $owner, '
         'tables: $tables)\n';
   }
+
 }
