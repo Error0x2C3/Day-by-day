@@ -14,7 +14,7 @@
 
 ---
 
-# 📘 Day-by-day
+# Day-by-day
 
 Every day, I write a piece of code.
 Not to be perfect.
@@ -31,7 +31,7 @@ This repository contains:
 
 ---
 
-# 🚀 Goals
+# Goals
 
 * Build a **daily discipline**
 * Explore languages and technologies
@@ -40,7 +40,7 @@ This repository contains:
 
 ---
 
-# 📂 Structure
+# Structure
 
 ```txt
 day-001/
@@ -56,7 +56,7 @@ Each folder = **one day = one improvement**.
 
 ---
 
-# 📜 Commit Agreement
+# Commit Agreement
 
 To keep a clear record of my progress, I use the following convention for my commit messages :
 
@@ -79,7 +79,7 @@ To keep a clear record of my progress, I use the following convention for my com
 
 ---
 
-# 🧰 Technologies Used
+# Technologies Used
 
 You will see appear over the days:
 
@@ -90,7 +90,7 @@ You will see appear over the days:
 
 ---
 
-# 💬 Contributing
+# Contributing
 
 This project is personal.
 But you can open an issue to:
