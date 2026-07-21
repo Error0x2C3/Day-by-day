@@ -23,11 +23,11 @@ But to **improve myself, day after day**.
 
 This repository contains:
 
-* ✨ Mini‑projects
-* 🧪 Experiments
-* 📚 Daily learning
-* 💡 Ideas and tests
-* 🔧 Tools and scripts
+* Mini‑projects
+* Experiments
+* Daily learning
+* Ideas and tests
+* Tools and scripts
 
 ---
 
